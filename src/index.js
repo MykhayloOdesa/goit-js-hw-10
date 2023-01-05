@@ -1,8 +1,79 @@
 import './css/styles.css';
+import { fetchCountries } from './js/fetchCountries';
 import debounce from 'lodash.debounce';
 import Notiflix from 'notiflix';
 
 const DEBOUNCE_DELAY = 300;
+
+const inputValue = document.querySelector('#search-box');
+const countryList = document.querySelector('.country-list');
+const countryInfo = document.querySelector('.country-info');
+
+inputValue.addEventListener('input', debounce(onInputSearch, DEBOUNCE_DELAY));
+
+function onInputSearch(event) {
+  if (!event.target.value) {
+    emptyInput();
+    Notiflix.Notify.warning('Please enter any data!');
+    return;
+  }
+
+  return fetchCountries(event.target.value.trim())
+    .then(showCountry)
+    .catch(showError);
+}
+
+function showCountry(countries) {
+  if (countries.length > 10) {
+    emptyInput();
+    Notiflix.Notify.info(
+      'Too many matches found. Please enter a more specific name.'
+    );
+    return;
+  }
+
+  if (countries.length >= 2 && countries.length <= 10) {
+    emptyInput();
+    const markup = countries
+      .map(({ flags, name }) => {
+        return `<li>
+                    <img src="${flags.svg}" alt="${name.official}" width="25" height="25" />
+                         <p>${name.official}</p>
+                </li>`;
+      })
+      .join('');
+    countryList.innerHTML = markup;
+    return;
+  }
+
+  emptyInput();
+  const markup = countries
+    .map(({ flags, name, capital, population, languages }) => {
+      return `<img src="${flags.svg}" alt="${
+        name.official
+      }" width="50" height="50" />
+                <h1>${name.official}</h1>
+                <p><span>Capital:&#160;</span>${capital}</p>
+                <p><span>Population:&#160;</span>${population}</p>
+                <p>
+                    <span>Languages:&#160;</span>
+                    ${Object.values(languages).join(', ')}
+                </p>`;
+    })
+    .join('');
+  countryInfo.innerHTML = markup;
+  return;
+}
+
+function showError() {
+  emptyInput();
+  Notiflix.Notify.failure('Oops, there is no country with that name');
+}
+
+function emptyInput() {
+  countryList.innerHTML = '';
+  countryInfo.innerHTML = '';
+}
 
 // Завдання - пошук країн
 // Створи фронтенд частину програми пошуку даних про країну за її частковою або повною назвою.
