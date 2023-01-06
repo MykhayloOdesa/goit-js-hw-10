@@ -30,9 +30,13 @@ function onInputSearch(event) {
 
   // Виконай санітизацію введеного рядка методом trim(), це вирішить проблему,
   // коли в полі введення тільки пробіли, або вони є на початку і в кінці рядка.
-  return fetchCountries(event.target.value.trim())
-    .then(showCountry)
-    .catch(showError);
+  return (
+    fetchCountries(event.target.value.trim())
+      .then(showCountry)
+      // Якщо користувач ввів назву країни, якої не існує, бекенд поверне не порожній масив, а помилку зі статус кодом 404 - не знайдено.
+      // Якщо це не обробити, то користувач ніколи не дізнається про те, що пошук не дав результатів.
+      .catch(showError)
+  );
 }
 
 function showCountry(countries) {
@@ -51,17 +55,14 @@ function showCountry(countries) {
   // Кожен елемент списку складається з прапора та назви країни.
   if (countries.length >= 2 && countries.length <= 10) {
     emptyInput();
-    const markup = countryListMarkup(countries);
-    countryList.innerHTML = markup;
+    countryList.innerHTML = countryListMarkup(countries);
     return;
   }
 
   // Якщо результат запиту - це масив з однією країною, в інтерфейсі відображається розмітка картки
   // з даними про країну: прапор, назва, столиця, населення і мови.
   emptyInput();
-  const markup = countryInfoMarkup(countries);
-  countryInfo.innerHTML = markup;
-  return;
+  countryInfo.innerHTML = countryInfoMarkup(countries);
 }
 
 // Додай повідомлення "Oops, there is no country with that name" у разі помилки, використовуючи бібліотеку notiflix.
