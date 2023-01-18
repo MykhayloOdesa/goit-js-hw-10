@@ -22,7 +22,7 @@ inputValue.addEventListener('input', debounce(onInputSearch, DEBOUNCE_DELAY));
 function onInputSearch(event) {
   // Якщо користувач повністю очищає поле пошуку, то HTTP-запит не виконується,
   // а розмітка списку країн або інформації про країну зникає.
-  if (!event.target.value) {
+  if (!event.target.value.trim()) {
     emptyInput();
     Notiflix.Notify.warning('Please enter any data!');
     return;
